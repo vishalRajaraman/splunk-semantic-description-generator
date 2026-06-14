@@ -22,7 +22,7 @@ Every Splunk app ever built is missing the `description` field that makes it MCP
 
 1. **🔬 Deep Scan** — reads every knowledge object in any Splunk app (saved searches, macros, dashboards, field extractions, lookups) via the REST API or local `.conf` files
 2. **🏥 Health Report** — flags deprecated commands, hardcoded IPs, performance anti-patterns, missing MCP descriptions, and Classic XML dashboards
-3. **🤖 AI Explanations** — uses Gemini to explain every search in plain English: what it reads, what it computes, who owns it, what business question it answers
+3. **🤖 AI Explanations** — uses Groq (Llama 3.3) to explain every search in plain English: what it reads, what it computes, who owns it, what business question it answers
 4. **🔗 MCP Patch Generator** — writes the exact `description =` fields Splunk's MCP Server needs, packaged as a drop-in `.conf` file
 
 ### Before vs After
@@ -105,7 +105,7 @@ Ask Claude the same question. It now immediately calls the correct saved search.
 │  └──────────┘  └──────────┘  └────┬─────┘  └───┬────┘  │
 └─────────────────────────────────────────────────────────┘
                                      │               │
-                              Gemini API         Outputs:
+                                Groq API         Outputs:
                                (AI calls)     ┌──────────────┐
                                               │ report.html  │
                                               │ patch.conf   │
@@ -125,7 +125,7 @@ Ask Claude the same question. It now immediately calls the correct saved search.
 |---|---|
 | Language | Python 3.11+ |
 | Splunk connection | `splunk-sdk` + REST API (port 8089) |
-| AI reasoning | Google Gemini API (`gemini-2.5-flash`) |
+| AI reasoning | Groq API (`llama-3.3-70b-versatile`) |
 | Web UI | Flask + Server-Sent Events (live progress) |
 | Report output | Jinja2 HTML + JSON + Markdown |
 | `.conf` patching | Plain text generation (drop-in, zero-code) |
@@ -147,7 +147,7 @@ Each knowledge object is scored 0–100:
 ## Qualifying Prize Tracks
 
 - **Platform / Developer Experience** — primary track: tooling that improves the Splunk development lifecycle
-- **AI Innovation** — uses Gemini to automate documentation + semantic enrichment
+- **AI Innovation** — uses Groq (Llama 3.3) to automate documentation + semantic enrichment
 - **Observability** — health scoring and deprecation detection serve monitoring/observability goals
 
 ## Impact
@@ -167,7 +167,7 @@ splunk-agent-readiness/
 │   ├── pipeline.py          ← Orchestration layer
 │   ├── scanner/             ← Splunk REST + local .conf scanning
 │   ├── health/              ← Deprecated/broken pattern detection
-│   ├── ai/                  ← Gemini explainer + MCP generator + prompts
+│   ├── ai/                  ← Groq/Llama 3.3 explainer + MCP generator + prompts
 │   ├── scorer/              ← Agent-readiness scoring (0–100)
 │   └── reporter/            ← HTML report + .conf patcher + migration plan
 ├── tests/mock_app/          ← 26-search Security Essentials replica for demos
