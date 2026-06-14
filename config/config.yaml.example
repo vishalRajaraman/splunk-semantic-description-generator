@@ -1,0 +1,19 @@
+splunk:
+  host: localhost
+  port: 8089
+  username: vishal
+  password: Vishal@123.
+  scheme: https
+  verify_ssl: false
+
+gemini:
+  api_key: AIzaSyBAm0mEQeQ1iLf09NmEHJc5AGiXxK3Y2Zg
+  model: gemini-2.5-flash
+  max_tokens: 1000
+  api_base: https://generativelanguage.googleapis.com/v1beta
+
+analysis:
+  activity_window_hours: 720
+  batch_size: 5
+  output_dir: ./output
+  activity_limit: 15

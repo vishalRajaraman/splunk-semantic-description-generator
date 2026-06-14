@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent-Readiness Report — {{ app_name }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#f0f2f5;color:#1e2530;font-size:14px;line-height:1.6}
+.page{max-width:1100px;margin:0 auto;padding:28px 20px}
+
+/* Header */
+.header{background:#fff;border:1px solid #dde1e9;border-radius:10px;padding:20px 24px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.header-left h1{font-size:18px;font-weight:700;color:#0f1623}
+.header-left p{font-size:12px;color:#8492a6;margin-top:2px}
+.score-block{text-align:right}
+.score-number{font-size:32px;font-weight:700;line-height:1}
+.score-grade{font-size:13px;color:#8492a6;margin-top:3px}
+.score-bar{height:5px;background:#e5e9f0;border-radius:3px;margin-top:8px;width:160px}
+.score-fill{height:100%;border-radius:3px}
+
+/* KPIs */
+.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid #dde1e9;border-radius:8px;padding:16px 18px}
+.kpi-val{font-size:26px;font-weight:700;line-height:1}
+.kpi-lbl{font-size:11px;color:#8492a6;margin-top:4px;text-transform:uppercase;letter-spacing:.04em}
+
+/* Panel */
+.panel{background:#fff;border:1px solid #dde1e9;border-radius:10px;margin-bottom:16px;overflow:hidden}
+.panel-head{padding:14px 20px;border-bottom:1px solid #eaecf0;display:flex;align-items:center;justify-content:space-between}
+.panel-head h2{font-size:14px;font-weight:600;color:#0f1623}
+.panel-body{padding:0}
+
+/* Tabs */
+.tabs{display:flex;gap:0;border-bottom:1px solid #eaecf0;padding:0 20px;background:#fafbfc}
+.tab{padding:11px 16px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:#8492a6;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;font-family:inherit;white-space:nowrap}
+.tab:hover{color:#2563eb}
+.tab.active{color:#2563eb;border-bottom-color:#2563eb}
+.tab-pane{display:none;padding:16px 20px}
+.tab-pane.active{display:block}
+
+/* Search rows */
+.search-row{border:1px solid #eaecf0;border-radius:8px;margin-bottom:10px;overflow:hidden}
+.search-row-head{display:flex;align-items:flex-start;justify-content:space-between;padding:14px 16px;gap:12px;background:#fafbfc;border-bottom:1px solid #eaecf0}
+.search-row-name{font-size:13px;font-weight:600;color:#0f1623;line-height:1.4}
+.search-row-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.search-row-body{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* Score pill */
+.pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.pill-green{background:#dcfce7;color:#166534}
+.pill-yellow{background:#fef9c3;color:#854d0e}
+.pill-red{background:#fee2e2;color:#991b1b}
+
+/* Blocker tag */
+.blocker{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:4px;background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5}
+
+/* Field */
+.field-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#8492a6;margin-bottom:4px}
+.field-val{font-size:13px;color:#374151;line-height:1.55}
+
+/* Diff */
+.diff{border:1px solid #eaecf0;border-radius:6px;overflow:hidden;margin-top:6px}
+.diff-b{background:#fff5f5;padding:10px 14px;border-bottom:1px solid #eaecf0}
+.diff-a{background:#f0fdf4;padding:10px 14px}
+.diff-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.diff-b .diff-lbl{color:#dc2626}
+.diff-a .diff-lbl{color:#16a34a}
+.diff-text{font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.diff-b .diff-text{color:#7f1d1d}
+.diff-a .diff-text{color:#14532d}
+
+/* Score breakdown */
+.bd{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.bd-chip{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:3px 8px;font-size:11px;color:#475569}
+.bd-chip b{color:#0f1623}
+
+/* Issues */
+.issues{display:flex;flex-direction:column;gap:5px;margin-top:10px}
+.issue{font-size:12px;padding:6px 10px;border-radius:4px;border-left:3px solid}
+.issue-ERROR{background:#fef2f2;color:#7f1d1d;border-color:#ef4444}
+.issue-WARNING{background:#fffbeb;color:#78350f;border-color:#f59e0b}
+
+/* Table */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#8492a6;padding:10px 14px;border-bottom:1px solid #eaecf0;text-align:left;background:#fafbfc}
+td{padding:11px 14px;border-bottom:1px solid #f1f4f9;vertical-align:top;color:#374151}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbfc}
+
+/* Version badge */
+.vbadge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px}
+.vbadge-xml{background:#dbeafe;color:#1d4ed8}
+.vbadge-studio{background:#dcfce7;color:#166534}
+.vbadge-nav{background:#f1f5f9;color:#64748b}
+
+/* Downloads */
+.dl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px 20px}
+.dl-card{border:1px solid #eaecf0;border-radius:8px;padding:16px}
+.dl-name{font-size:13px;font-weight:600;color:#0f1623;margin-bottom:4px}
+.dl-desc{font-size:12px;color:#8492a6;margin-bottom:12px;line-height:1.5}
+.dl-btn{display:block;width:100%;padding:8px;background:#f1f5f9;border:1px solid #dde1e9;border-radius:6px;font-size:12px;font-weight:600;color:#374151;cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s;text-align:center}
+.dl-btn:hover{background:#e0e7ef;border-color:#2563eb;color:#2563eb}
+
+/* Why section */
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px 20px}
+.why-card{border-radius:8px;padding:16px;border:1px solid}
+.why-b{background:#fff5f5;border-color:#fca5a5}
+.why-a{background:#f0fdf4;border-color:#86efac}
+.why-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.why-b .why-lbl{color:#dc2626}
+.why-a .why-lbl{color:#16a34a}
+.why-code{font-size:12px;line-height:1.6;white-space:pre-wrap}
+.why-b .why-code{color:#7f1d1d}
+.why-a .why-code{color:#14532d}
+.why-note{font-size:12px;color:#6b7280;margin-top:10px}
+
+@media(max-width:720px){
+  .kpi-row,.search-row-body,.dl-grid,.why-grid{grid-template-columns:1fr}
+  .header{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>{{ app_name }}</h1>
+    <p>Splunk Agent-Readiness Report &nbsp;·&nbsp; {{ generated_at }}</p>
+  </div>
+  <div class="score-block" style="display:flex;align-items:center;gap:16px;flex-shrink:0">
+    <!-- Before -->
+    <div style="text-align:right;opacity:0.65">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8492a6;margin-bottom:4px">Before</div>
+      <div style="font-size:28px;font-weight:700;color:{{ scoring.before_grade_color }};line-height:1">{{ scoring.before_score }}<span style="font-size:13px;font-weight:400;color:#8492a6">/100</span></div>
+      <div style="font-size:11px;color:#8492a6;margin-top:2px">{{ scoring.before_grade }}</div>
+    </div>
+    <!-- Arrow + delta -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      {% set delta = scoring.overall_score - scoring.before_score %}
+      <div style="font-size:20px;color:#8492a6">→</div>
+      {% if delta > 0 %}
+      <div style="font-size:11px;font-weight:700;background:#dcfce7;color:#166534;padding:2px 8px;border-radius:12px;white-space:nowrap">+{{ delta }} pts</div>
+      {% elif delta < 0 %}
+      <div style="font-size:11px;font-weight:700;background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:12px;white-space:nowrap">{{ delta }} pts</div>
+      {% else %}
+      <div style="font-size:11px;font-weight:600;background:#f1f5f9;color:#64748b;padding:2px 8px;border-radius:12px">no change</div>
+      {% endif %}
+    </div>
+    <!-- After -->
+    <div style="text-align:left">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#2563eb;margin-bottom:4px">After AI</div>
+      <div class="score-number" style="color:{{ scoring.grade_color }}">{{ scoring.overall_score }}<span style="font-size:16px;font-weight:400;color:#8492a6">/100</span></div>
+      <div class="score-grade">{{ scoring.grade }}</div>
+      <div class="score-bar" style="margin-top:6px"><div class="score-fill" style="width:{{ scoring.overall_score }}%;background:{{ scoring.grade_color }}"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-row">
+  <div class="kpi"><div class="kpi-val" style="color:#2563eb">{{ total_objects }}</div><div class="kpi-lbl">{{ searches|length }} Searches · {{ macros|length }} Macros</div></div>
+  <div class="kpi"><div class="kpi-val" style="color:#dc2626">{{ scoring.pre_patch_missing | default(scoring.mcp_blockers) }}</div><div class="kpi-lbl">Objects Missing Description</div></div>
+  <div class="kpi"><div class="kpi-val" style="color:#d97706">{{ dashboards|selectattr('version','in',['simple_xml','simple_xml_form'])|list|length }}</div><div class="kpi-lbl">Classic Dashboards</div></div>
+</div>
+
+<!-- DESCRIPTION COVERAGE BREAKDOWN -->
+{% set s_has  = searches | selectattr('had_original_description') | list | length %}
+{% set s_miss = searches | rejectattr('had_original_description') | list | length %}
+{% set m_has  = macros   | selectattr('had_original_description') | list | length %}
+{% set m_miss = macros   | rejectattr('had_original_description') | list | length %}
+<div class="panel" style="margin-bottom:16px">
+  <div class="panel-head"><h2>Description Coverage</h2><span style="font-size:12px;color:#8492a6">How many objects already have a description in Splunk vs. need the patch</span></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th style="text-align:center">Total</th>
+        <th style="text-align:center;color:#16a34a">Have Description</th>
+        <th style="text-align:center;color:#dc2626">Missing Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="font-weight:600;color:#0f1623">Saved Searches</td>
+        <td style="text-align:center;font-weight:600">{{ searches|length }}</td>
+        <td style="text-align:center"><span style="color:#16a34a;font-weight:700">{{ s_has }}</span></td>
+        <td style="text-align:center"><span style="color:#dc2626;font-weight:700">{{ s_miss }}</span></td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:#0f1623">Macros</td>
+        <td style="text-align:center;font-weight:600">{{ macros|length }}</td>
+        <td style="text-align:center"><span style="color:#16a34a;font-weight:700">{{ m_has }}</span></td>
+        <td style="text-align:center"><span style="color:#dc2626;font-weight:700">{{ m_miss }}</span></td>
+      </tr>
+      <tr style="background:#f8fafc;border-top:2px solid #dde1e9">
+        <td style="font-weight:700;color:#0f1623">Total</td>
+        <td style="text-align:center;font-weight:700">{{ total_objects }}</td>
+        <td style="text-align:center"><span style="color:#16a34a;font-weight:700">{{ s_has + m_has }}</span></td>
+        <td style="text-align:center"><span style="background:#fee2e2;color:#991b1b;font-weight:700;padding:2px 10px;border-radius:12px">{{ scoring.pre_patch_missing | default(s_miss + m_miss) }}</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- KNOWLEDGE OBJECTS -->
+<div class="panel">
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('all',this)">All ({{ searches|length }})</button>
+    <button class="tab" onclick="showTab('macros',this)">Macros ({{ macros|length }})</button>
+    <button class="tab" onclick="showTab('dash',this)">Dashboards ({{ dashboards|length }})</button>
+  </div>
+
+  <!-- ALL -->
+  <div class="tab-pane active" id="tab-all">
+  {% for s in searches %}
+  {% set sc = s.score|default(0) %}
+  {% set pill = 'pill-green' if sc >= 60 else ('pill-yellow' if sc >= 35 else 'pill-red') %}
+  <div class="search-row">
+    <div class="search-row-head">
+      <div class="search-row-name">{{ s.name }}</div>
+      <div class="search-row-right">
+        {% if s.is_mcp_blocker %}<span class="blocker">MCP Blocker</span>{% endif %}
+        <span class="pill {{ pill }}">{{ sc }}/100</span>
+      </div>
+    </div>
+    <div class="search-row-body">
+      <div>
+        <div class="field-lbl">Plain English</div>
+        <div class="field-val">{{ s.plain_english | default('—') }}</div>
+      </div>
+      <div>
+        <div class="field-lbl">Business Question</div>
+        <div class="field-val">{{ s.business_question | default('—') }}</div>
+      </div>
+    </div>
+    {% if s.mcp_description %}
+    <div style="padding:0 16px 14px">
+      {% if s.is_mcp_blocker %}
+      {# Search had NO description in Splunk — show empty → patched diff #}
+      <div class="field-lbl">MCP Description Patch</div>
+      <div class="diff">
+        <div class="diff-b">
+          <div class="diff-lbl">— Before (empty — invisible to AI agent)</div>
+          <div class="diff-text">[{{ s.name }}]
+description = </div>
+        </div>
+        <div class="diff-a">
+          <div class="diff-lbl">+ After (applied via agent_ready_patch.conf)</div>
+          <div class="diff-text">[{{ s.name }}]
+description = {{ s.mcp_description }}</div>
+        </div>
+      </div>
+      {% else %}
+      {# Search already had a description — show original vs AI-enhanced #}
+      <div class="field-lbl">AI-Enhanced Description</div>
+      <div class="diff">
+        <div class="diff-b">
+          <div class="diff-lbl">— Original description in Splunk</div>
+          <div class="diff-text">[{{ s.name }}]
+description = {{ s.description }}</div>
+        </div>
+        <div class="diff-a">
+          <div class="diff-lbl">+ AI-enhanced (agent-optimised wording)</div>
+          <div class="diff-text">[{{ s.name }}]
+description = {{ s.mcp_description }}</div>
+        </div>
+      </div>
+      {% endif %}
+      {% if s.score_breakdown %}
+      <div class="bd" style="margin-top:10px;align-items:center;gap:8px">
+        <span class="bd-chip" style="background:#fff5f5;border-color:#fca5a5;color:#991b1b">
+          Original desc: <b>{{ s.orig_desc_score | default(0) }}/35</b>
+        </span>
+        <span style="color:#8492a6;font-size:12px">→</span>
+        <span class="bd-chip" style="background:#f0fdf4;border-color:#86efac;color:#166534">
+          AI desc: <b>{{ s.ai_desc_score | default(0) }}/35</b>
+        </span>
+        <span style="flex:1"></span>
+        {% for k, v in s.score_breakdown.items() if k != 'description' %}
+        <span class="bd-chip">{{ k }}: <b>{{ v }}</b></span>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% set real_issues = s.health_issues | selectattr('type','ne','missing_mcp_description') | list %}
+      {% if real_issues %}
+      <div class="issues">
+        {% for issue in real_issues %}
+        <div class="issue issue-{{ issue.severity }}"><strong>{{ issue.severity }}</strong>: {{ issue.message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  {% else %}<p style="color:#8492a6;padding:12px 0">No saved searches found.</p>{% endfor %}
+  </div>
+
+
+
+  <!-- READY -->
+  <div class="tab-pane" id="tab-good">
+  {% for s in good %}
+  <div class="search-row">
+    <div class="search-row-head">
+      <div class="search-row-name">{{ s.name }}</div>
+      <div class="search-row-right"><span class="pill pill-green">{{ s.score }}/100</span></div>
+    </div>
+    <div style="padding:12px 16px">
+      <div class="field-lbl">MCP Description</div>
+      <div class="field-val">{{ s.mcp_description | default('—') }}</div>
+    </div>
+  </div>
+  {% else %}<p style="color:#8492a6;padding:8px 0">No agent-ready searches yet — apply the MCP patch.</p>{% endfor %}
+  </div>
+
+  <!-- MACROS -->
+  <div class="tab-pane" id="tab-macros">
+  <table>
+    <thead><tr><th>Name</th><th>Args</th><th>Description</th><th>Score</th></tr></thead>
+    <tbody>
+    {% for m in macros %}
+    <tr>
+      <td style="font-weight:600;color:#0f1623;white-space:nowrap">{{ m.name }}</td>
+      <td style="color:#6b7280;font-size:12px">{{ m.args | default('—') }}</td>
+      <td style="font-size:12px;color:#374151">{{ m.mcp_description | default(m.plain_english) | default('—') }}</td>
+      <td>
+        {% if m.score is defined %}
+        {% set mc = 'pill-green' if m.score >= 60 else ('pill-yellow' if m.score >= 35 else 'pill-red') %}
+        <span class="pill {{ mc }}">{{ m.score }}/100</span>
+        {% else %}—{% endif %}
+      </td>
+    </tr>
+    {% else %}<tr><td colspan="4" style="color:#8492a6">No macros found.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  </div>
+
+  <!-- DASHBOARDS -->
+  <div class="tab-pane" id="tab-dash">
+  <table>
+    <thead><tr><th>Name</th><th>Version</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for d in dashboards %}
+    <tr>
+      <td style="font-weight:500;color:#0f1623">{{ d.label }}</td>
+      <td>
+        {% if d.version in ['simple_xml','simple_xml_form'] %}<span class="vbadge vbadge-xml">Simple XML</span>
+        {% elif d.version == 'studio_v2' %}<span class="vbadge vbadge-studio">Dashboard Studio v2</span>
+        {% elif d.version == 'nav_view' %}<span class="vbadge vbadge-nav">Nav View</span>
+        {% else %}<span class="vbadge vbadge-nav">{{ d.version }}</span>{% endif %}
+      </td>
+      <td style="font-size:12px;color:#8492a6">
+        {% if d.version in ['simple_xml','simple_xml_form'] %}Migrate to Dashboard Studio{% else %}—{% endif %}
+      </td>
+    </tr>
+    {% else %}<tr><td colspan="3" style="color:#8492a6">No dashboards found.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- DOWNLOADS -->
+<div class="panel">
+  <div class="panel-head"><h2>Generated Outputs</h2></div>
+  <div class="dl-grid">
+    <div class="dl-card">
+      <div class="dl-name">agent_ready_patch.conf</div>
+      <div class="dl-desc">Drop into your app's <code style="font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px">default/</code> folder. Adds AI-generated MCP descriptions to {{ scoring.pre_patch_missing | default(scoring.mcp_blockers) }} object(s) that lacked one — zero SPL changes.</div>
+      <button class="dl-btn" onclick="downloadFile('agent_ready_patch.conf')">⬇ Download</button>
+    </div>
+    <div class="dl-card">
+      <div class="dl-name">migration_plan.md</div>
+      <div class="dl-desc">Step-by-step prioritised migration plan with effort estimates for each object.</div>
+      <button class="dl-btn" onclick="downloadFile('migration_plan.md')">⬇ Download</button>
+    </div>
+    <div class="dl-card">
+      <div class="dl-name">raw_analysis.json</div>
+      <div class="dl-desc">Full structured JSON with all scores, descriptions, and health issue details.</div>
+      <button class="dl-btn" onclick="downloadFile('raw_analysis.json')">⬇ Download</button>
+    </div>
+  </div>
+</div>
+
+<!-- WHY MCP -->
+<div class="panel">
+  <div class="panel-head"><h2>Why MCP Descriptions Matter</h2></div>
+  <div class="why-grid">
+    <div class="why-card why-b">
+      <div class="why-lbl">✕ Before — Agent Has No Context</div>
+      <div class="why-code">[Brute Force - Failed Logins]
+search = index=security ...
+description = </div>
+      <p class="why-note">AI agent cannot determine when or why to invoke this search. It picks the wrong tool or fails to act.</p>
+    </div>
+    <div class="why-card why-a">
+      <div class="why-lbl">✓ After — Agent-Ready</div>
+      <div class="why-code">[Brute Force - Failed Logins]
+search = index=security ...
+description = Use when investigating brute-force
+  attempts. Returns failed login counts by
+  user and source IP. Trigger when count
+  exceeds 10 within a 1-hour window.</div>
+      <p class="why-note">Agent selects this tool correctly, passes the right parameters, and returns accurate results.</p>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+function showTab(id,el){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  el.classList.add('active');
+}
+const FILE_DATA = {{ file_data_json | safe }};
+function downloadFile(name){
+  const c=FILE_DATA[name];
+  if(!c){alert('File not found.');return;}
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([c],{type:'text/plain'}));
+  a.download=name;a.click();URL.revokeObjectURL(a.href);
+}
+</script>
+</body>
+</html>

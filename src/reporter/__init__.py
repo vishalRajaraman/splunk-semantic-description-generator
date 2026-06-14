@@ -1,0 +1,2 @@
+"""Report and patch generation."""
+

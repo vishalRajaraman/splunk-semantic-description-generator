@@ -1,0 +1,13 @@
+<dashboard>
+  <label>Security Overview</label>
+  <row>
+    <panel>
+      <chart>
+        <search>
+          <query>index=os "Failed password" | timechart count</query>
+        </search>
+      </chart>
+    </panel>
+  </row>
+</dashboard>
+
